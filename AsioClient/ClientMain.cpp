@@ -38,11 +38,26 @@ private:
 	void OnConnect(const asio::error_code er) {;
 		if (!er) {
 			cout << "connected" << endl;
-			cin >> message;
+			sock.async_receive(buffer(read_buf), std::bind(&server_session::OnRead, shared_from_this()));
 		}
 		else {
 			cout << er.message();
 		}
+	}
+
+	void Write() {
+		cout << "waiting for message: ";
+		getline(cin, message);
+		sock.async_send(buffer(message), std::bind(&server_session::OnRead, shared_from_this()));
+	}
+
+	void Read() {
+		sock.async_receive(buffer(read_buf), std::bind(&server_session::OnRead, shared_from_this()));
+	}
+
+	void OnRead() {
+		cout << "i read: " << read_buf << endl;
+		Write();
 	}
 };
 
@@ -56,4 +71,5 @@ int main() {
 
 	con.run();
 
+	return 0;
 }
