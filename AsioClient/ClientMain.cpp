@@ -24,8 +24,8 @@ private:
 	string message;
 
 public:
-	static std::shared_ptr<server_session> Create(ip::tcp::endpoint ep, const string& mes, io_context& con) {
-		std::shared_ptr<server_session> new_clt(new server_session(mes, con));
+	static std::shared_ptr<server_session> Create(ip::tcp::endpoint ep) {
+		std::shared_ptr<server_session> new_clt(new server_session());
 		new_clt->Connect(ep);
 		return new_clt;
 	}
@@ -33,7 +33,7 @@ public:
 	~server_session() { Disconect(); };
 
 private:
-	server_session(const string& mes, asio::io_context& con) : sock(con), started(false), message(mes) {
+	server_session() : sock(con), started(false) {
 		// один для чтения, другой для записи
 		std::thread t1(&server_session::HandlerThread, this);
 		std::thread t2(&server_session::HandlerThread, this);
@@ -62,7 +62,6 @@ private:
 	}
 
 	void Read() {
-		cout << "entered in READ" << endl;
 		sock.async_receive(buffer(read_buf), std::bind(&server_session::OnRead, shared_from_this()));
 	}
 
@@ -94,12 +93,9 @@ private:
 };
 
 int main() {
-
-	string mes = "123";
-
 	ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8001);
 
-	std::shared_ptr<server_session> clt = server_session::Create(ep, mes, con);
+	std::shared_ptr<server_session> clt = server_session::Create(ep);
 
 	this_thread::sleep_for(200000ms);
 
