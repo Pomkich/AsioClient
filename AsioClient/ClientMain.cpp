@@ -23,6 +23,8 @@ private:
 	bool started;
 	string message;
 
+	friend BOOL ctrl_handler(DWORD);
+
 public:
 	static std::shared_ptr<server_session> Create(ip::tcp::endpoint ep) {
 		std::shared_ptr<server_session> new_clt(new server_session());
@@ -92,10 +94,23 @@ private:
 	}
 };
 
-int main() {
-	ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8001);
 
-	std::shared_ptr<server_session> clt = server_session::Create(ep);
+ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8001);
+std::shared_ptr<server_session> clt = server_session::Create(ep);
+
+
+BOOL ctrl_handler(DWORD event)
+{
+	if (event == CTRL_CLOSE_EVENT) {
+		clt->sock.async_send(buffer("-disconect"), std::bind(&server_session::Disconect, clt));
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int main() {
+
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)(ctrl_handler), TRUE);
 
 	this_thread::sleep_for(200000ms);
 
