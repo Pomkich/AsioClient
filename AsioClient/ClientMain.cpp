@@ -26,8 +26,9 @@ private:
 	friend BOOL ctrl_handler(DWORD);
 
 public:
-	static std::shared_ptr<server_session> Create(ip::tcp::endpoint ep) {
+	static std::shared_ptr<server_session> Create() {
 		std::shared_ptr<server_session> new_clt(new server_session());
+		ip::tcp::endpoint ep = GetAddress();
 		new_clt->Connect(ep);
 		return new_clt;
 	}
@@ -36,18 +37,26 @@ public:
 
 private:
 	server_session() : sock(con), started(false) {
-		// один для чтения, другой для записи
-		std::thread t1(&server_session::HandlerThread, this);
-		std::thread t2(&server_session::HandlerThread, this);
-		t1.detach();
-		t2.detach();
 	};
 
 	void HandlerThread() {
 		con.run();
 	};
 
+	static ip::tcp::endpoint GetAddress(){
+		cout << "Enter server address please: ";
+		string address;
+		cin >> address;
+		return ip::tcp::endpoint(ip::address::from_string(address), 8001);
+	}
+
 	void Connect(ip::tcp::endpoint ep) {
+		// один для чтения, другой для записи
+		std::thread t1(&server_session::HandlerThread, this);
+		std::thread t2(&server_session::HandlerThread, this);
+		t1.detach();
+		t2.detach();
+
 		asio::error_code er;
 		sock.async_connect(ep, std::bind(&server_session::OnConnect, shared_from_this(), er));
 	}
@@ -58,8 +67,14 @@ private:
 
 	void Write() {
 		if (!started) return;
-		cout << "waiting for message: " << endl;
+		cout << ">";
 		getline(cin, message);
+		// удаляем пробелы
+		auto iter = find_if(message.begin(), message.end(), [](char c) { return (c != ' '); });
+		if (iter != message.begin()) {
+			message.erase(remove(message.begin(), iter, ' '), iter);
+		}
+
 		if (message == "-disconect") Disconect();
 		sock.async_send(buffer(message), std::bind(&server_session::OnWrite, shared_from_this()));
 	}
@@ -84,26 +99,25 @@ private:
 	}
 
 	void OnWrite() {
-		cout << "message was send" << endl;
 		memset(write_buf, 0x00, 1024);
 		Write();
 	}
 
 	void OnRead() {
-		cout << "i read: " << read_buf << endl;
+		cout << read_buf << endl;
 		memset(read_buf, 0x00, 1024);
 		Read();
 	}
 };
 
 
-ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8001);
-std::shared_ptr<server_session> clt = server_session::Create(ep);
+//ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 8001);
+std::shared_ptr<server_session> clt = server_session::Create();
 
 
 BOOL ctrl_handler(DWORD event)
 {
-	if (event == CTRL_CLOSE_EVENT) {
+	if (event == CTRL_CLOSE_EVENT && clt->started) {
 		clt->sock.async_send(buffer("-disconect"), std::bind(&server_session::Disconect, clt));
 		return TRUE;
 	}
