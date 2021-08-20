@@ -54,16 +54,18 @@ private:
 
 	void Disconect() {
 		started = false;
-		sock.close();
 	}
 
 	void Write() {
+		if (!started) return;
 		cout << "waiting for message: " << endl;
 		getline(cin, message);
+		if (message == "-disconect") Disconect();
 		sock.async_send(buffer(message), std::bind(&server_session::OnWrite, shared_from_this()));
 	}
 
 	void Read() {
+		if (!started) return;
 		sock.async_receive(buffer(read_buf), std::bind(&server_session::OnRead, shared_from_this()));
 	}
 
