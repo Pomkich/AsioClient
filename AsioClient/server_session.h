@@ -5,6 +5,7 @@
 #include <functional>
 #include <string>
 #include <asio.hpp>
+#include "WinConsolePresenter.h"
 
 using namespace std;
 using namespace asio;
@@ -18,6 +19,7 @@ private:
 	char write_buf[max_len];
 	bool started;
 	string message;
+	ConsolePresenter* Pres;
 
 	friend BOOL ctrl_handler(DWORD);
 

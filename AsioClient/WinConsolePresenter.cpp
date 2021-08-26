@@ -14,7 +14,7 @@ void WinConsolePresenter::ConsoleWrite(std::string mes) {
 	COORD cur_pos = SCInfo.dwCursorPosition;
 
 	// записываем в буфер всё, что написали но не отправили
-	int input_size = cur_pos.X - 1;
+	int input_size = cur_pos.X;
 	wchar_t cur_ch = '#', space = ' ';
 	DWORD readed, writen;
 	COORD origin_copy = origin;
@@ -30,6 +30,7 @@ void WinConsolePresenter::ConsoleWrite(std::string mes) {
 }
 
 std::string WinConsolePresenter::GetConsoleInput() {
+	std::cout << '>';
 	std::string message;
 	std::getline(std::cin, message);
 	// удаляем пробелы

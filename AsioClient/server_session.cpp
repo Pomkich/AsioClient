@@ -11,7 +11,9 @@ server_session::~server_session() {
 	Disconect();
 }
 
-server_session::server_session() : sock(con), started(false) {};
+server_session::server_session() : sock(con), started(false) {
+	Pres = new WinConsolePresenter();
+};
 
 void server_session::HandlerThread() {
 	con.run();
@@ -41,13 +43,7 @@ void server_session::Disconect() {
 
 void server_session::Write() {
 	if (!started) return;
-	cout << ">";
-	getline(cin, message);
-	// удаляем пробелы
-	auto iter = find_if(message.begin(), message.end(), [](char c) { return (c != ' '); });
-	if (iter != message.begin()) {
-		message.erase(remove(message.begin(), iter, ' '), iter);
-	}
+	message = Pres->GetConsoleInput();
 
 	if (message == "-disconect") Disconect();
 	sock.async_send(buffer(message), std::bind(&server_session::OnWrite, shared_from_this()));
@@ -60,7 +56,7 @@ void server_session::Read() {
 
 void server_session::OnConnect(const asio::error_code er) {
 	if (!er) {
-		cout << "connected" << endl;
+		Pres->ConsoleWrite("connected");
 		started = true;
 		// условно начинаем одновременно читать и отсылать
 		Read();
@@ -77,7 +73,7 @@ void server_session::OnWrite() {
 }
 
 void server_session::OnRead() {
-	cout << read_buf << endl;
+	Pres->ConsoleWrite(read_buf);
 	memset(read_buf, 0x00, max_len);
 	Read();
 }
