@@ -3,12 +3,13 @@
 #include <Windows.h>
 #include <string>
 #include <iostream>
+#include <mutex>
 
 class WinConsolePresenter : public ConsolePresenter
 {
 private:
 	HANDLE consoleHandle;
-
+	std::mutex mut;
 public:
 	WinConsolePresenter();
 	void ConsoleWrite(std::string mes) override;

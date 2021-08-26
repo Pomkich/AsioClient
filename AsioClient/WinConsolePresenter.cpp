@@ -6,6 +6,7 @@ WinConsolePresenter::WinConsolePresenter() {
 
 //	! возможно потребуетс€ мьютекс !
 void WinConsolePresenter::ConsoleWrite(std::string mes) {
+	std::lock_guard<std::mutex> lock(mut);
 	memset(input_buf, 0x00, max_len);
 	CONSOLE_SCREEN_BUFFER_INFO SCInfo;
 	GetConsoleScreenBufferInfo(consoleHandle, &SCInfo);
@@ -30,7 +31,10 @@ void WinConsolePresenter::ConsoleWrite(std::string mes) {
 }
 
 std::string WinConsolePresenter::GetConsoleInput() {
-	std::cout << '>';
+	{
+		std::lock_guard<std::mutex> lock(mut);
+		std::cout << '>';
+	}
 	std::string message;
 	std::getline(std::cin, message);
 	// удал€ем пробелы
