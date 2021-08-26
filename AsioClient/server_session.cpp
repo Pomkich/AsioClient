@@ -72,12 +72,12 @@ void server_session::OnConnect(const asio::error_code er) {
 }
 
 void server_session::OnWrite() {
-	memset(write_buf, 0x00, 1024);
+	memset(write_buf, 0x00, max_len);
 	Write();
 }
 
 void server_session::OnRead() {
 	cout << read_buf << endl;
-	memset(read_buf, 0x00, 1024);
+	memset(read_buf, 0x00, max_len);
 	Read();
 }
