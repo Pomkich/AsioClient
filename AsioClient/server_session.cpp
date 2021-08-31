@@ -26,6 +26,44 @@ ip::tcp::endpoint server_session::GetAddress() {
 	return ip::tcp::endpoint(ip::address::from_string(address), 8001);
 }
 
+void server_session::Menu() {
+	string command;
+	do {
+		command = GetCommand();
+	} while (!HandleCommand(command));
+}
+
+string server_session::GetCommand() {
+	string com;
+	cin >> com;
+	// удаляем пробелы с конца команды
+	auto it = find_if(com.begin(), com.end(), [](char c) {return c != ' '; });
+	if (it != com.begin()) {
+		com.erase(remove(com.begin(), it, ' '), com.end());
+	}
+	return com;
+}
+
+// 1 - смогли обработать сообщение, 0 - не смогли
+bool server_session::HandleCommand(string com){
+	if (com == "-connect") {
+		auto address = GetAddress();
+		Connect(address);
+		return true;
+	}
+	else if (com == "-help") {
+		Pres->ConsoleWrite("-connect; -exit");
+		return false;
+	}
+	else if (com == "-exit") {
+		exit(0);
+	}
+	else {
+		Pres->ConsoleWrite("unknown command: use <-help> for info.");
+		return false;
+	}
+}
+
 void server_session::Connect(ip::tcp::endpoint ep) {
 	// один для чтения, другой для записи
 	std::thread t1(&server_session::HandlerThread, this);

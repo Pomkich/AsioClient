@@ -31,6 +31,9 @@ private:
 	server_session();
 	void HandlerThread();
 	static ip::tcp::endpoint GetAddress();
+	void Menu();
+	string GetCommand();
+	bool HandleCommand(string);
 	void Connect(ip::tcp::endpoint ep);
 	void Disconect();
 	void Write();
