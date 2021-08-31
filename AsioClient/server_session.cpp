@@ -2,8 +2,6 @@
 
 std::shared_ptr<server_session> server_session::Create() {
 	std::shared_ptr<server_session> new_clt(new server_session());
-	ip::tcp::endpoint ep = GetAddress();
-	new_clt->Connect(ep);
 	return new_clt;
 }
 
@@ -29,19 +27,8 @@ ip::tcp::endpoint server_session::GetAddress() {
 void server_session::Menu() {
 	string command;
 	do {
-		command = GetCommand();
+		command = Pres->GetConsoleInput();
 	} while (!HandleCommand(command));
-}
-
-string server_session::GetCommand() {
-	string com;
-	cin >> com;
-	// удаляем пробелы с конца команды
-	auto it = find_if(com.begin(), com.end(), [](char c) {return c != ' '; });
-	if (it != com.begin()) {
-		com.erase(remove(com.begin(), it, ' '), com.end());
-	}
-	return com;
 }
 
 // 1 - смогли обработать сообщение, 0 - не смогли
@@ -76,14 +63,21 @@ void server_session::Connect(ip::tcp::endpoint ep) {
 }
 
 void server_session::Disconect() {
+	sock.async_send(buffer("-disconect"), std::bind(&server_session::OnWrite, shared_from_this()));
 	started = false;
+	sock.shutdown(sock.shutdown_both);
+	sock.close();
 }
 
 void server_session::Write() {
 	if (!started) return;
 	message = Pres->GetConsoleInput();
 
-	if (message == "-disconect") Disconect();
+	if (message == "-disconect") {
+		Disconect();
+		Menu();
+		return;
+	}
 	sock.async_send(buffer(message), std::bind(&server_session::OnWrite, shared_from_this()));
 }
 

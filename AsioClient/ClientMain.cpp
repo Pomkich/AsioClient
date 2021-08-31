@@ -27,6 +27,8 @@ int main() {
 
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)(ctrl_handler), TRUE);
 
+	clt->Menu();
+
 	this_thread::sleep_for(200000ms);
 
 	return 0;

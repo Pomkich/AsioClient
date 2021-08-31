@@ -25,14 +25,13 @@ private:
 
 public:
 	static std::shared_ptr<server_session> Create();
+	void Menu();
 	~server_session();
 
 private:
 	server_session();
 	void HandlerThread();
-	static ip::tcp::endpoint GetAddress();
-	void Menu();
-	string GetCommand();
+	ip::tcp::endpoint GetAddress();
 	bool HandleCommand(string);
 	void Connect(ip::tcp::endpoint ep);
 	void Disconect();
