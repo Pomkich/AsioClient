@@ -37,7 +37,7 @@ private:
 	void Disconect();
 	void Write();
 	void Read();
-	void OnConnect(const asio::error_code er);
+	void OnConnect(asio::error_code& er);
 	void OnWrite();
 	void OnRead();
 };

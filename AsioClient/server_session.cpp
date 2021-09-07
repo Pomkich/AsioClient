@@ -18,9 +18,8 @@ void server_session::HandlerThread() {
 }
 
 ip::tcp::endpoint server_session::GetAddress() {
-	cout << "Enter server address please: ";
-	string address;
-	cin >> address;
+	Pres->ConsoleWrite("Enter server address please: ");
+	string address = Pres->GetConsoleInput();
 	return ip::tcp::endpoint(ip::address::from_string(address), 8001);
 }
 
@@ -63,6 +62,7 @@ void server_session::Connect(ip::tcp::endpoint ep) {
 }
 
 void server_session::Disconect() {
+	// нужно послать серверу сообщение о том, что мы отключились
 	sock.async_send(buffer("-disconect"), std::bind(&server_session::OnWrite, shared_from_this()));
 	started = false;
 	sock.shutdown(sock.shutdown_both);
@@ -86,7 +86,17 @@ void server_session::Read() {
 	sock.async_receive(buffer(read_buf), std::bind(&server_session::OnRead, shared_from_this()));
 }
 
-void server_session::OnConnect(const asio::error_code er) {
+void server_session::OnConnect(asio::error_code& er) {
+	// проверяем, установлено ли соединение
+	try {
+		Pres->ConsoleWrite(sock.remote_endpoint().address().to_string());
+	}
+	catch (std::exception ex) {
+		Pres->ConsoleWrite("connection refused");
+		Menu();
+		return;
+	}
+	// проверяем на другие ошибки
 	if (!er) {
 		Pres->ConsoleWrite("connected");
 		started = true;
@@ -95,7 +105,7 @@ void server_session::OnConnect(const asio::error_code er) {
 		Write();
 	}
 	else {
-		cout << er.message();
+		Pres->ConsoleWrite( er.message());
 	}
 }
 

@@ -76,6 +76,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\C++ Libs\asio-1.18.2\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -141,6 +142,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClientMain.cpp" />
+    <ClCompile Include="server_session.cpp" />
+    <ClCompile Include="WinConsolePresenter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConsolePresenter.h" />
+    <ClInclude Include="server_session.h" />
+    <ClInclude Include="WinConsolePresenter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
