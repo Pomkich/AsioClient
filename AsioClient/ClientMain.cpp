@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
-
 #include <asio.hpp>
 #include <functional>
 #include <memory>
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 #include "server_session.h"
 
 using namespace std;
@@ -29,7 +29,11 @@ int main() {
 
 	clt->Menu();
 
-	this_thread::sleep_for(200000ms);
+	// лочим этот поток до тех пор, пока выполняется приложение
+	mutex mt;
+	condition_variable cv;
+	unique_lock<mutex> lock(mt);
+	cv.wait(lock);
 
 	return 0;
 }
